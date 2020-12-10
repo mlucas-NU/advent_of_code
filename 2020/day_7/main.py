@@ -2,8 +2,7 @@ import argparse
 import logging
 import re
 
-from dataclasses import dataclass
-from operator import xor
+from collections import defaultdict
 
 # Parse Arguments
 
@@ -17,71 +16,60 @@ if args.verbosity:
     verbosity = args.verbosity
 logging.getLogger().setLevel(logging.getLevelName(verbosity))
 
-
-# Helper classes
-
-@dataclass
-class SimplePasswordPolicy:
-    required_char: str
-    min_occurrences: int
-    max_occurrences: int
-
-    def __init__(self, raw_policy: str):
-        regex_matches = re.match(r'([0-9]+)-([0-9]+) ([a-z])', raw_policy)
-        self.min_occurrences = int(regex_matches.group(1))
-        self.max_occurrences = int(regex_matches.group(2))
-        self.required_char = regex_matches.group(3)
-
-    def validate(self, password):
-        char_count = password.count(self.required_char)
-        return (char_count >= self.min_occurrences) and (char_count <= self.max_occurrences)
-
-
-@dataclass
-class BetterPasswordPolicy:
-    required_char: str
-    first_position: int
-    second_position: int
-
-    def __init__(self, raw_policy: str):
-        regex_matches = re.match(r'([0-9]+)-([0-9]+) ([a-z])', raw_policy)
-        self.first_position = int(regex_matches.group(1)) - 1
-        self.second_position = int(regex_matches.group(2)) - 1
-        self.required_char = regex_matches.group(3)
-
-    def validate(self, password):
-        logging.debug((password[self.first_position], password[self.second_position]))
-        return xor(password[self.first_position] == self.required_char, password[self.second_position] == self.required_char)
-
-
 # Load Inputs
 
-input_lines = []
+rules = {}
 input_file = args.input_file
 with open(input_file) as f:
     for line in f.readlines():
-        assert re.match(r'^[0-9]+-[0-9]+ [a-z]: [a-z]+$', line) is not None
-        input_lines.append(line[:-1])
+        match = re.match(r'(.*) bags contain (.*)', line)
+        container, contents = match.groups()
+
+        if contents == 'no other bags.':
+            rules[container] = set()
+        else:
+            internal_bags = set()
+            while len(contents) > 0:
+                match = re.match(r'\s*([0-9]+) ([^,\.]*) bags?[,\.](.*)', contents)
+                count, color, contents = match.groups()
+
+                internal_bags.add((color, int(count)))
+
+            rules[container] = internal_bags
 
 # Main Logic
 
-num_valid_simple_passwords = 0
-num_valid_better_passwords = 0
+count = 0
+for start_color in rules.keys():
+    open_set = {start_color}
+    closed_set = set()
 
-for line in input_lines:
-    raw_policy, password = line.split(': ')
+    while len(open_set) > 0:
+        key = open_set.pop()
 
-    simple_policy = SimplePasswordPolicy(raw_policy)
-    if simple_policy.validate(password):
-        num_valid_simple_passwords += 1
+        for new_key, _ in rules[key]:
+            if new_key != key and new_key not in closed_set:
+                open_set.add(new_key)
 
-    better_policy = BetterPasswordPolicy(raw_policy)
-    if better_policy.validate(password):
-        num_valid_better_passwords += 1
+        closed_set.add(key)
 
-    if verbosity == 'DEBUG':
-        logging.debug(f'{raw_policy}: {password} => Simple={simple_policy.validate(password)}, Better={better_policy.validate(password)}')
+        if 'shiny gold' in open_set:
+            count += 1
+            break
+
+logging.info(f'Bags containing shiny gold: {count}')
+
+open_set = defaultdict(int)
+open_set['shiny gold'] = 1
+total = 0
+while len(open_set) > 0:
+    key, count = open_set.popitem()
+    total += count
+
+    logging.debug((key, count))
+    logging.debug(f'Rule: {rules[key]}')
+    for new_key, new_count in rules[key]:
+        open_set[new_key] += count * new_count
 
 
-logging.info(f'Num Valid Simple Passwords: {num_valid_simple_passwords}')
-logging.info(f'Num Valid Better Passwords: {num_valid_better_passwords}')
+logging.info(f'1 Shiny Gold contains {total - 1} bags')

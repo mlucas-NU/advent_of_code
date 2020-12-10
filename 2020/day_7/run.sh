@@ -1,6 +1,6 @@
 SCRIPT_DIR=$(dirname "$0")
 
-TEST_ANSWER=2
+TEST_ANSWER=4
 TEST_INPUT_FILE=$SCRIPT_DIR/input_test.txt
 MAIN_INPUT_FILE=$SCRIPT_DIR/input_1.txt
 
