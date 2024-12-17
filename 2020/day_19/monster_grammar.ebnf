@@ -1,0 +1,34 @@
+@@grammar::Monster
+
+start = rule_0 $;
+rule_0 = rule_8 rule_11;
+rule_1 = "a";
+rule_10 = rule_23 rule_14 | rule_28 rule_1;
+rule_11 = rule_42 [rule_11] rule_31;
+rule_12 = rule_24 rule_14 | rule_19 rule_1;
+rule_13 = rule_14 rule_3 | rule_1 rule_12;
+rule_14 = "b";
+rule_15 = rule_1 | rule_14;
+rule_16 = rule_15 rule_1 | rule_14 rule_14;
+rule_17 = rule_14 rule_2 | rule_1 rule_7;
+rule_18 = rule_15 rule_15;
+rule_19 = rule_14 rule_1 | rule_14 rule_14;
+rule_2 = rule_1 rule_24 | rule_14 rule_4;
+rule_20 = rule_14 rule_14 | rule_1 rule_15;
+rule_21 = rule_14 rule_1 | rule_1 rule_14;
+rule_22 = rule_14 rule_14;
+rule_23 = rule_25 rule_1 | rule_22 rule_14;
+rule_24 = rule_14 rule_1;
+rule_25 = rule_1 rule_1 | rule_1 rule_14;
+rule_26 = rule_14 rule_22 | rule_1 rule_20;
+rule_27 = rule_1 rule_6 | rule_14 rule_18;
+rule_28 = rule_16 rule_1;
+rule_3 = rule_5 rule_14 | rule_16 rule_1;
+rule_31 = rule_14 rule_17 | rule_1 rule_13;
+rule_4 = rule_1 rule_1;
+rule_42 = rule_9 rule_14 | rule_10 rule_1;
+rule_5 = rule_1 rule_14 | rule_15 rule_1;
+rule_6 = rule_14 rule_14 | rule_1 rule_14;
+rule_7 = rule_14 rule_5 | rule_1 rule_21;
+rule_8 = rule_42+;
+rule_9 = rule_14 rule_27 | rule_1 rule_26;
